@@ -1,5 +1,19 @@
 << 매장 테이블 예약 서비스 >>
 
+
+=============================== << ERD 작성 >> ===============================
+- ERD 관계선 참고 블로그
+  : https://eyecandyzero.tistory.com/246
+
+1. JPA Entity에서 id를 int가 아닌 long 타입으로 선언하는 이유
+   - 참고블로그 : https://lealea.tistory.com/237
+   - 위의 글을 참고해 mysql의 id는 int, java의 entity는 long 타입으로 선언.
+     (이렇게되면 데이터의 범위는 int까지 저장가능.)
+
+
+
+
+
 =============================== << 비즈니스 프로세스 작성 >> ===============================
 - 참고블로그
   : https://www.edrawsoft.com/kr/article/how-to-create-bpmn-diagram.html
