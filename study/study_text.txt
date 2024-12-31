@@ -237,4 +237,24 @@ https://www.elancer.co.kr/blog/detail/235
 
 
 
+5. 비밀번호 암호화 인터페이스 PasswordEncoder
+   - 참고 블로그
+     : https://hou27.tistory.com/entry/Spring-Boot-Spring-Security-%EC%A0%81%EC%9A%A9%ED%95%98%EA%B8%B0-%EC%95%94%ED%98%B8%ED%99%94
+
+   - PswwaordEncoder 인터페이스 정의
+       public interface PasswordEncoder {
+           // 비밀번호 암호화 (회원가입 시 사용)
+           String encode(CharSequence rawPassword);
+
+           // 평문 비밀번호, 암호화된 비밀번호 일치여부 확인 (로그인 시 사용)
+           boolean matches(CharSequence rawPassword, String encodedPassword);
+
+           default boolean upgradeEncoding(String encodedPassword) {
+               return false;
+           }
+       }
+
+
+
+
 
