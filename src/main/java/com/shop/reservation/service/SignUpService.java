@@ -36,6 +36,11 @@ public class SignUpService {
         ShopManager savedShopManager =
                 shopManagerRepository.save(shopManagerDto.toEntity(shopManagerDto));
 
+        // createid, updateid 수정
+        // (매장관리자 정보 등록 시 id 미존재로 insert 불가해서 일단 update를 통해 등록)
+        savedShopManager.setCreateId(savedShopManager.getId());
+        savedShopManager.setUpdateId(savedShopManager.getId());
+
         return savedShopManager;
     }
 

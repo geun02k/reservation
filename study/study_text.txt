@@ -57,3 +57,28 @@
      : https://webcoding-start.tistory.com/53
 
 
+
+
+
+=============================== << @Transactional 사용시 DB에 자동저장 되지않는 문제 >> ===============================
+- 발생문제
+  @Transactional 자동 save, update 되지 않는 오류.
+  : @Transactional 어노테이션을 이용하면 자동으로 DB에 저장된다고 알고있었다.
+    Dirty Checking은 find~ 메서드 호출 후 snapshot을 찍어 해당 Entity의 변경 사항이 발생했는지 확인한다.
+    나는 find 하지 않았기 때문에 Dirty Checking이 수행되지 않았다.
+    그런데 save 호출 후 find한 뒤에 변경해도 Dirty Checking을 수행하지 않았다... 왜지..
+
+  - 관련 내용 : JPA 와 영속성 (Dirty Checking)
+https://velog.io/@aj4941/Transactional%EA%B3%BC-%EB%B3%80%EA%B2%BD-%EA%B0%90%EC%A7%80-Dirty-Checking
+https://junior-datalist.tistory.com/349
+https://velog.io/@yeongori/Dirty-Checking-is-Not-Working
+
+- 발생원인
+  : 기존 데이터 null값, 변경된 데이터도 null값이었기 때문에 실질적으로 변경사항이 전혀 없어서 update되지 않음.
+
+- 해결방법
+  : 실제 데이터를 변경해주니 정상동작했다.
+
+
+
+
