@@ -1,6 +1,7 @@
 package com.shop.reservation.service;
 
 import com.shop.reservation.entity.ShopManager;
+import com.shop.reservation.exception.SignUpException;
 import com.shop.reservation.model.ShopManagerDto;
 import com.shop.reservation.repository.ShopManagerRepository;
 import jakarta.transaction.Transactional;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.util.regex.Pattern;
+
+import static com.shop.reservation.exception.type.SignUpErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -20,10 +23,7 @@ public class SignUpService {
     @Transactional // DB의 CreateId, UpdateId 자동 수정을 위해 사용
     public ShopManager saveManager(ShopManagerDto shopManagerDto) {
         // validation check
-        if(!memberValidationCheck(shopManagerDto)) {
-            System.out.println("회원정보가 유효하지않습니다.");
-            return null;
-        }
+        memberValidationCheck(shopManagerDto);
 
         // 공백, 전화번호의 '-' 문자 제거
         shopManagerDto.setName(shopManagerDto.getName().trim());
@@ -45,26 +45,23 @@ public class SignUpService {
     }
 
     // 회원가입 validation check
-    private boolean memberValidationCheck(ShopManagerDto member) {
+    private void memberValidationCheck(ShopManagerDto member) throws SignUpException {
         // id 미존재 validation check
         if(!ObjectUtils.isEmpty(member.getId())) {
-            System.out.println("이미 등록된 회원입니다.");
-            return false;
+            throw new SignUpException(ALREADY_REGISTERED_MEMBER);
         }
 
         // 사용자명 validation check
         if (ObjectUtils.isEmpty(member.getName().trim())
                 || member.getName().length() > 50) {
-            System.out.println("사용자명 길이는 50자로 제한됩니다.");
-            return false;
+            throw new SignUpException(LIMIT_NAME_CHARACTERS_FROM_1_TO_50);
         }
 
         // 비밀번호 validation check
         if (ObjectUtils.isEmpty(member.getPassword().trim())
                 || 8 > member.getPassword().length()
                 || member.getPassword().length() > 100) {
-            System.out.println("비밀번호는 최소 8자 이상 최대 100자 이하입니다.");
-            return false;
+            throw new SignUpException(LIMIT_PASSWORD_CHARACTERS_FROM_8_TO_100);
         }
 
         // 전화번호 validation check
@@ -74,16 +71,12 @@ public class SignUpService {
 
         if (ObjectUtils.isEmpty(member.getPhone().trim())
                 || !(Pattern.matches(phonePattern, realPhoneNumber))) {
-            System.out.println("유효하지 않은 전화번호입니다.");
-            return false;
+            throw new SignUpException(INVALID_PHONE_NUMBER);
         }
         
         // 전화번호 중복등록 체크
         if(!ObjectUtils.isEmpty(shopManagerRepository.findByPhone(realPhoneNumber))) {
-            System.out.println("이미 등록된 전화번호입니다.");
-            return false;
+            throw new SignUpException(ALREADY_REGISTERED_PHONE_NUMBER);
         }
-
-        return true;
     }
 }
