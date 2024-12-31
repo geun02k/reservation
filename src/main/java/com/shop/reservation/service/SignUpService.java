@@ -6,6 +6,7 @@ import com.shop.reservation.model.ShopManagerDto;
 import com.shop.reservation.repository.ShopManagerRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -16,6 +17,12 @@ import static com.shop.reservation.exception.type.SignUpErrorCode.*;
 @Service
 @RequiredArgsConstructor
 public class SignUpService {
+    // PasswordEncoder
+    // : 인코딩된 패스워드 정보를 DB에 저장하기 위해 사용.
+    //   PasswordEncoder 인터페이스를 통해 인코딩을 수행하기 위해서는
+    //   어떤 구현체를 사용할 것인지 직접 정의해 빈 등록이 필요.
+    //   이는 AppConfig.java 파일에서 정의.
+    private final PasswordEncoder passwordEncoder;
 
     private final ShopManagerRepository shopManagerRepository;
 
@@ -31,7 +38,9 @@ public class SignUpService {
         shopManagerDto.setPhone(shopManagerDto.getPhone().trim().replaceAll("-", ""));
 
         // 비밀번호 암호화
-        
+        shopManagerDto.setPassword(
+                passwordEncoder.encode(shopManagerDto.getPassword()));
+
         // 매장관리자 정보 등록
         ShopManager savedShopManager =
                 shopManagerRepository.save(shopManagerDto.toEntity(shopManagerDto));
