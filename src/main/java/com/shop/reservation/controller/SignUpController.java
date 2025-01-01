@@ -1,7 +1,7 @@
 package com.shop.reservation.controller;
 
-import com.shop.reservation.entity.ShopManager;
-import com.shop.reservation.model.ShopManagerDto;
+import com.shop.reservation.entity.Member;
+import com.shop.reservation.model.MemberDto;
 import com.shop.reservation.service.SignUpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +20,7 @@ public class SignUpController {
 
     /** 매장관리자 회원가입 */
     @PostMapping("/manager")
-    public ResponseEntity<ShopManager> managerSignUp(@RequestBody ShopManagerDto shopManager) {
-        return ResponseEntity.ok(signUpService.saveManager(shopManager));
+    public ResponseEntity<Member> managerSignUp(@RequestBody MemberDto memberDto) {
+        return ResponseEntity.ok(signUpService.createMember(memberDto));
     }
 }
