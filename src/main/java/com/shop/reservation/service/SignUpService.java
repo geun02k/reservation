@@ -41,14 +41,21 @@ public class SignUpService {
         memberDto.setPassword(
                 passwordEncoder.encode(memberDto.getPassword()));
 
-        // 매장관리자 정보 등록
+        // 사용자 정보 등록
         Member savedMember =
                 memberRepository.save(memberDto.toEntity(memberDto));
 
-        // createid, updateid 수정
         // (매장관리자 정보 등록 시 id 미존재로 insert 불가해서 일단 update를 통해 등록)
+        // createid, updateid 수정
         savedMember.setCreateId(savedMember.getId());
         savedMember.setUpdateId(savedMember.getId());
+
+        // 사용자 권한에서 사용자ID 수정
+        savedMember.getRoles().forEach(role -> {
+            role.setMemberId(savedMember.getId());
+            role.setCreateId(savedMember.getId());
+            role.setUpdateId(savedMember.getId());
+        });
 
         return savedMember;
     }
