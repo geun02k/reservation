@@ -1,9 +1,9 @@
 package com.shop.reservation.service;
 
-import com.shop.reservation.entity.ShopManager;
+import com.shop.reservation.entity.Member;
 import com.shop.reservation.exception.SignUpException;
-import com.shop.reservation.model.ShopManagerDto;
-import com.shop.reservation.repository.ShopManagerRepository;
+import com.shop.reservation.model.MemberDto;
+import com.shop.reservation.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,37 +24,44 @@ public class SignUpService {
     //   이는 AppConfig.java 파일에서 정의.
     private final PasswordEncoder passwordEncoder;
 
-    private final ShopManagerRepository shopManagerRepository;
+    private final MemberRepository memberRepository;
 
-    /** 매장관리자 회원가입 */
+    /** 회원가입 */
     @Transactional // DB의 CreateId, UpdateId 자동 수정을 위해 사용
-    public ShopManager saveManager(ShopManagerDto shopManagerDto) {
+    public Member createMember(MemberDto memberDto) {
         // validation check
-        memberValidationCheck(shopManagerDto);
+        memberValidationCheck(memberDto);
 
         // 공백, 전화번호의 '-' 문자 제거
-        shopManagerDto.setName(shopManagerDto.getName().trim());
-        shopManagerDto.setPassword(shopManagerDto.getPassword().trim());
-        shopManagerDto.setPhone(shopManagerDto.getPhone().trim().replaceAll("-", ""));
+        memberDto.setName(memberDto.getName().trim());
+        memberDto.setPassword(memberDto.getPassword().trim());
+        memberDto.setPhone(memberDto.getPhone().trim().replaceAll("-", ""));
 
         // 비밀번호 암호화
-        shopManagerDto.setPassword(
-                passwordEncoder.encode(shopManagerDto.getPassword()));
+        memberDto.setPassword(
+                passwordEncoder.encode(memberDto.getPassword()));
 
-        // 매장관리자 정보 등록
-        ShopManager savedShopManager =
-                shopManagerRepository.save(shopManagerDto.toEntity(shopManagerDto));
+        // 사용자 정보 등록
+        Member savedMember =
+                memberRepository.save(memberDto.toEntity(memberDto));
 
-        // createid, updateid 수정
         // (매장관리자 정보 등록 시 id 미존재로 insert 불가해서 일단 update를 통해 등록)
-        savedShopManager.setCreateId(savedShopManager.getId());
-        savedShopManager.setUpdateId(savedShopManager.getId());
+        // createid, updateid 수정
+        savedMember.setCreateId(savedMember.getId());
+        savedMember.setUpdateId(savedMember.getId());
 
-        return savedShopManager;
+        // 사용자 권한에서 사용자ID 수정
+        savedMember.getRoles().forEach(role -> {
+            role.setMemberId(savedMember.getId());
+            role.setCreateId(savedMember.getId());
+            role.setUpdateId(savedMember.getId());
+        });
+
+        return savedMember;
     }
 
     // 회원가입 validation check
-    private void memberValidationCheck(ShopManagerDto member) throws SignUpException {
+    private void memberValidationCheck(MemberDto member) throws SignUpException {
         // id 미존재 validation check
         if(!ObjectUtils.isEmpty(member.getId())) {
             throw new SignUpException(ALREADY_REGISTERED_MEMBER);
@@ -84,7 +91,7 @@ public class SignUpService {
         }
         
         // 전화번호 중복등록 체크
-        if(!ObjectUtils.isEmpty(shopManagerRepository.findByPhone(realPhoneNumber))) {
+        if(!ObjectUtils.isEmpty(memberRepository.findByPhone(realPhoneNumber))) {
             throw new SignUpException(ALREADY_REGISTERED_PHONE_NUMBER);
         }
     }
