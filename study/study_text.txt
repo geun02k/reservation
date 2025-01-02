@@ -342,3 +342,30 @@ https://www.elancer.co.kr/blog/detail/235
    - spring.jwt.secret-key: '생성한 비밀키 등록'
 
 
+5. JWT 토큰생성 (TokenAuthenticationProvider.java)
+   : 버전 업데이트에 따라 설정방식 변경됨.
+     (claims 별도 생성x, 속성 설정 메서드 변경됨.
+      Claims : 변경 불가능한 JSON Map (한번 입력 후 getter만 사용가능.))
+   - 참고 블로그
+     : https://velog.io/@qkre/Spring-Security-%EB%B2%84%EC%A0%84-%EC%97%85-%EB%90%9C-%EC%8A%A4%ED%94%84%EB%A7%81-%EC%8B%9C%ED%81%90%EB%A6%AC%ED%8B%B0%EC%97%90%EC%84%9C-JWT-%EB%B0%9C%ED%96%89%ED%95%98%EA%B8%B0
+
+   - 비밀키를 생성하는데 encoding이 아닌 decoding하는 이유...? (아직모름.)
+     JWT 서명을 검증하기 위해서 비밀 키를 생성하는 과정
+     secret 문자열을 UTF-8 바이트 배열로 변환한 후
+     Keys.hmacShakeyFor()를 사용해서 HMAC-SHA 알고리즘에 맞는 키 객체를 만든다!
+     ex) private SecretKey getDecodedSecretKey() {
+            byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+            return Keys.hmacShaKeyFor(keyBytes);
+         }
+
+         비밀키 왜 디코딩..?
+         기존 문자열 혹은 바이트를 인수로 받는 signWith 메서드가 Deprecated 됨.
+         signWith 메서드는 지정된 키와 저장된 알고리즘을 사용해 토큰에 서명함.
+         따라서 java.security의 Key 객체를 인수로 넣음.
+         Key 객체 생성 시 알고리즘 적용 가능.
+         또는 signWith 메서드의 2번째 인수로 알고리즘 넣어도 됨.
+
+
+
+
+
