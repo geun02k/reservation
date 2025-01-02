@@ -26,14 +26,28 @@ public class SignUpController {
     /** 매장관리자 회원가입 */
     @PostMapping("/manager")
     public ResponseEntity<Member> managerSignUp(@RequestBody MemberDto memberDto) {
-        // 사용자별 권한부여
-        List<MemberRole> roleList = new ArrayList<>();
-        roleList.add(MemberRole.builder()
-                        .role(UserType.SHOP_MANAGER)
-                        .build());
-        memberDto.setRoles(roleList);
+        // 사용자 권한부여
+        addUserNewRole(UserType.SHOP_MANAGER, memberDto);
 
         // 회원가입
         return ResponseEntity.ok(signUpService.createMember(memberDto));
+    }
+
+    /** 고객 회원가입 */
+    @PostMapping("/customer")
+    public ResponseEntity<Member> customerSignUp(@RequestBody MemberDto memberDto) {
+        // 사용자 권한부여
+        addUserNewRole(UserType.CUSTOMER, memberDto);
+        // 회원가입
+        return ResponseEntity.ok(signUpService.createMember(memberDto));
+    }
+
+    // 사용자 신규 권한 추가
+    private void addUserNewRole(UserType userType, MemberDto memberDto) {
+        List<MemberRole> roleList = new ArrayList<>();
+        roleList.add(MemberRole.builder()
+                .role(userType)
+                .build());
+        memberDto.setRoles(roleList);
     }
 }
