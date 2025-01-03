@@ -43,7 +43,7 @@ public class Member extends BaseEntity implements UserDetails {
         // -> 스프링 시큐리티에서 지원하는 role 관련기능을 쓰기 위함.
         return this.roles.stream()
                 .map((MemberRole role) ->
-                        new SimpleGrantedAuthority(role.toString()))
+                        new SimpleGrantedAuthority(role.getRole().toString()))
                 .collect(Collectors.toList());
     }
 
