@@ -30,10 +30,10 @@ public class SignInController {
         Member member = signInService.authenticate(memberDto);
 
         // 2. 토큰 생성
-        String token = tokenProvider.createToken(memberDto.getPhone(),
-                                                memberDto.getId(),
-                                                memberDto.getRoles());
-        log.info("user login -> " + memberDto.getId() + ", " + memberDto.getPhone());
+        String token = tokenProvider.createToken(member.getPhone(),
+                                                member.getId(),
+                                                member.getRoles());
+        log.info("user login -> " + member.getId() + ", " + member.getPhone());
 
         // 3. 토큰 반환
         return ResponseEntity.ok(token);
