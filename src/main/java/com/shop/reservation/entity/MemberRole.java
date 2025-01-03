@@ -1,5 +1,6 @@
 package com.shop.reservation.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.shop.reservation.type.UserType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,6 +25,7 @@ public class MemberRole extends BaseEntity {
     private UserType role;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name="memberId", insertable = false, updatable = false) // 테이블 매핑 시 foreign key 지정
     private Member member;
 
