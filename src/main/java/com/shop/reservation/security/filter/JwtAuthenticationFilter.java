@@ -46,7 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = resolveTokenFromRequest(request);
 
         // 2. 토큰값 만료시간 유효성 검증
-        if (!tokenProvider.validateToken(token)) {
+        if (tokenProvider.validateToken(token)) {
             // 3. JWT 토큰정보 -> 스프링 시큐리티 인증정보로 변환
             //    : SignInService.loadUserByUsername() 메서드를 통해 조회 후 인증정보 생성
             Authentication auth = tokenProvider.getAuthentication(token);
@@ -54,7 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(auth);
 
             // 사용자 요청 경로 로그 남기기
-            log.info(String.format("[%s] -> %s authenticated -> ",
+            log.info(String.format("[%s] -> %s authenticated.",
                     tokenProvider.getUserPhone(token),
                     request.getRequestURI()));
         }
