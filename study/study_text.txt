@@ -424,6 +424,26 @@ https://www.elancer.co.kr/blog/detail/235
      - 참고 블로그
        : https://loginshin.tistory.com/98
 
+
+- 로그인 시 아래의 오류발생
+  (근데 데이터 반환을 회원가입때 하고 로그인 때는 토큰만 반환하는데 왜 로그인 때 에러가 났지..?)
+  : com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.LocalDateTime` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: io.jsonwebtoken.impl.DefaultClaims["roles"]->org.hibernate.collection.spi.PersistentBag[0]->com.shop.reservation.entity.MemberRole["createDate"])
+  - 발생원인
+    : LocalDateTime 데이터타입은 바이트화(직렬화) 할 때 어떤 규칙으로 진행할 것인지
+      Serialization에 대한 정의가 되어있지않아 발생한 에러.
+      LocalDateTime에 대해 어떤 데이터 타입으로 직렬화, 역직렬화 할 것인지 따로 지정이 필요.
+  - 해결방법
+    : 날짜타입의 직렬화 역직렬화를 위해 아래의 어노테이션 추가
+        @JsonSerialize(using = LocalDateTimeSerializer.class) // 직렬화
+        @JsonDeserialize(using = LocalDateTimeDeserializer.class) // 역직렬화
+        @JsonFormat(pattern = "yyyy-MM-dd kk-mm:ss") // 원하는 형태의 LocalDateTime 설정
+  - 참고 블로그
+    : https://justdo1tme.tistory.com/entry/Spring-Jackson-%EC%9D%B4%ED%95%B4-%EB%B0%8F-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0
+
+
+
+
+
 =============================== << ResponseEntity >> ===============================
 1. ResponseEntity
    : HTTP 응답을 나타내는 Spring Framework 클래스.
