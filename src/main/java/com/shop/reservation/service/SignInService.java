@@ -5,6 +5,9 @@ import com.shop.reservation.exception.SignInException;
 import com.shop.reservation.model.MemberDto;
 import com.shop.reservation.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +16,24 @@ import static com.shop.reservation.exception.type.SignInErrorCode.USER_NOT_FOUND
 
 @Service
 @RequiredArgsConstructor
-public class SignInService {
+public class SignInService implements UserDetailsService {
 
     private final PasswordEncoder passwordEncoder;
 
     private final MemberRepository memberRepository;
+
+    /**
+     * 사용자인증
+     * @param phone the username identifying the user whose data is required.
+     * @return UserDetails 사용자정보
+     * @throws UsernameNotFoundException
+     */
+    @Override
+    public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
+        // 고유한 전화번호로 사용자 조회
+        return this.memberRepository.findByPhone(phone)
+                .orElseThrow(() -> new SignInException(USER_NOT_FOUND));
+    }
 
     /** 로그인 검증 */
     public Member authenticate(MemberDto memberDto) {

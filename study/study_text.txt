@@ -369,12 +369,17 @@ https://www.elancer.co.kr/blog/detail/235
 
 
 
-=============================== << SignInService.java >> ===============================
-- 스프링 시큐리티 기능 사용을 위해 UserDetailsService 인터페이스 구현
+=============================== << 스프링 시큐리티를 이용한 로그인 (최소한의) 인증 구현 >> ===============================
+1. 사용자 Entity 생성 (Member.java)
+   : 사용자 인증 시 사용할 Entity
+   - 스프링 시큐리티 기능 사용을 위해 UserDetailsService 인터페이스 구현
 
 
-1. loadUserByUsername()
-   - 스프링 시큐리티 기능을 사용하기위한 필수구현 메서드
+2. 사용자 인증 service (SignInService.java)
+   : DB에 사용자 존재여부, 비밀번호 일치여부 확인 완료 시 로그인 토큰 반환.
+
+   - loadUserByUsername()
+     : 스프링 시큐리티 기능을 사용하기위한 필수구현 메서드
 
    - UserDetails 반환타입
      : memberRepository.findByUsername() 메서드의 반환타입은 Optional<MemberEntity>이다.
@@ -389,10 +394,35 @@ https://www.elancer.co.kr/blog/detail/235
        : https://velog.io/@jyyoun1022/SpringSpring-Security%EB%A5%BC-%EC%9D%B4%EC%9A%A9%ED%95%9C-%EB%A1%9C%EA%B7%B8%EC%9D%B8%EC%B2%98%EB%A6%AC-5
 
 
-2.
+3. 인증 Filter (JwtAuthenticationFileter.java)
+   : 인증 필터를 통해 토큰의 유효성을 확인한다.
 
+   - OncePerRequestFilter 필터를 상속해 생성.
+     : OncePerRequestFilter 라는 필터를 정의해주게 되면 모든 요청이 올 때 마다 (한 요청당 한 번)
+       필터 실행.
 
+   - doFilterInternal() 메서드 필수구현.
 
+   - 사용자가 signup, signin api를 호출했을 때 바로 해당 컨트롤러로 요청이 들어오는 것은 아니다.
+     컨트롤러로 요청이 들어오기 전에 제일 먼저 필터를 거치게 된다.
+     ( 컨트롤러 요청 -> 필터 -> 서블릿 -> 인터셉터 -> aop layer를 거친 후 컨트롤러 호출.
+       응답을 내보낼 때는 위의 과정을 반대로 거쳐 내보낸다. )
+     OncePerRequestFilter를 상속했기에 요청이 들어올 때 마다 매번 해당 필터를 실행하게 된다.
+     따라서 컨트롤러 실행 전의 request. 컨트롤러 실행 후 응답 시 response를 가공가능.
+     So, 컨트롤러에 요청이 들어올 때 마다 사용자토큰의 포함여부, 유효성 여부 등 확인가능.
+
+   - UsernamePasswordAuthenticationToken 클래스
+     : 사용자이름, 비밀번호를 기반으로 사용자 인증을 처리하는 역할을 수행.
+       주로 사용자 인증 정보를 캡슐화하고 인증 프로세스 중에 사용됨.
+     - 주요 목적
+       : 사용자로부터 입력받은 사용자이름, 비밀번호롤
+         AuthenticationManager에 전달에 인증을 수행.
+     - 주요 필드
+       - principal : 사용자이름
+       - credentials : 비밀번호
+       - authorities : 사용자권한
+     - 참고 블로그
+       : https://loginshin.tistory.com/98
 
 =============================== << ResponseEntity >> ===============================
 1. ResponseEntity
