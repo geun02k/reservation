@@ -255,6 +255,44 @@ https://www.elancer.co.kr/blog/detail/235
        }
 
 
+6. 예외처리
+   - 참고 블로그
+     : https://backend-jaamong.tistory.com/169
+
+   -  AuthenticationEntryPoint 인터페이스
+      : 인증되지 않은 사용자가 인증이 필요한 endpoint(api url)로 접근 시 발생하는
+        401 Unauthorized 예외처리할 수 있도록 도움.
+     commence()
+     : 인증되지 않은 요청 발생 시 호출되는 메서드.
+       예외처리를 직접 수행하지 않고 HandlerExceptionResolver로 넘긴다.
+
+   - AccessDeniedHandler
+     : 권한이 없는 사용자가 권한이 필요한 endpoint로 접근 시 발생하는
+       403 Forbidden 예외를 처리할 수 있도록 도움.
+     handle()
+     : 권한이 없는 요청이 발생했을 때 호출되는 메서드.
+       예외를 직접 처리하지 않고 HandlerExceptionResolver로 넘긴다.
+
+  - HandlerExceptionResolver
+    : Spring Security 영역이 아닌 Spring MVC 영역에 속해있는 컴포넌트.
+      스프링 MVC에서 HandlerExceptionResolver는
+      DispatcherServlet의 HandlerExceptionResolver체인(예외처리체인)에 등록되어있다.
+      이 체인은 컨트롤러 영역에서 발생한 예외를 처리하는 역할을 한다.
+      따라서 위의 두 스프링 시큐리티 핸들러는 결국 스프링 MVC의 HandlerExceptionResolver를 호출해
+      컨트롤러에서 예외를 처리할 수 있도록 한다.
+
+    - handlerExceptionResolver.resolveException(request, response, null, accessDeniedException);
+      위와 같이 handler = null 로 전달하면 ExceptionHandler를 찾아 실행한다.
+      만약 처리할 수 있는 ExceptionResolver가 없으면 예외처리를 수행하지 않고 기존 발생한 예외를 서블릿 밖으로 던진다.
+      즉, null을 인자로 전달하면 @RestControllerAdvice, @ExceptionHandler를 사용하는 클래스에서 예외처리가 가능해진다.
+
+
+7. JWT와 세션
+   - JWT 토큰을 사용해 사용자 인증을 진행하는 경우 Session stateless 설정하는 이유.
+     - 참고 블로그
+       : https://mini-frontend.tistory.com/6
+       : https://giron.tistory.com/17
+
 
 
 
@@ -269,6 +307,248 @@ https://www.elancer.co.kr/blog/detail/235
 - 회원과 권한 일대다 관계
   - 참고 블로그
     : https://ttl-blog.tistory.com/126
+
+
+
+
+============================== << JWT : Json Web Token >> ===============================
+- Dividend 파일 정보와 통합해 정리필요.
+- 필수 참고 블로그
+  : https://hjpkotlin2024.tistory.com/68
+
+
+1. JWT
+   : 많이 사용하는 보안방식 중 하나.
+     보통은 송수신측에서 인증가능한 키들을 가지고 신뢰여부를 판단한다.
+     보통은 인증서 등을 통해 진행한다.
+
+2. 구성
+    - 헤더
+    - 페이로드 : 일반적으로 키가 없어도 다른 사람들과 디코드 가능함.
+                So, 중요 데이터는 담지 않는다.
+    - 시그니쳐
+
+- JWT를 통해 로그인을 하고 아이디를 추출하도록 한다.
+
+- user-api에서 zerobase-domain 프로젝트 의존성 추가 시 user-api 에서 zerobase-domain의 클래스에 접근가능.
+
+- 토큰을 이용해 접근 제어권한을 확인하려고 한다.
+  로그인을 하지 않은 사람이 허용되지 않은 엔드포인드(경로?)에 접근하는 문제를 막는다.
+
+- user-api 에서 zerobase-domain 모듈 호출 시,
+  다른 모듈에 있는 것을 끌고와 사용하는 경우에는 빈이 자동 생성되지 않는다.
+  JwtConfig 파일을 생성해 객체를 생성하도록 한다.
+  (해당 내용에 대해서는 객체의 생성과 소멸에 대한 공부 권장)
+      @Configuration
+      public class JwtConfig {
+
+          @Bean
+          public JwtAuthenticationProvider jwtAuthenticationProvider() {
+              return new JwtAuthenticationProvider();
+          }
+      }
+      -----------------------------------------------------------------------
+        package com.zerobase.cms.user.application;
+
+        import config.com.zerobase.domain.JwtAuthenticationProvider;
+
+        @Service
+        @RequiredArgsConstructor
+        public class SignInApplication {
+
+            private final CustomerService customerService;
+            private final JwtAuthenticationProvider provider;
+            ...
+        }
+
+
+3. 비밀키 생성
+  : JWT 토큰 생성 시 사용할 비밀키 생성.
+   - 토큰 생성시 HS512알고리즘 사용을 위해 -> 512비트(64바이트 이상)의 시크릿키 사용.
+   - 평문을 사용하기보다는 base64로 인코딩한 값을 사용.
+   - 터미널에서 생성가능.
+     : 평문키 파일을 생성해 base64로 인코딩한 새파일 생성
+       C:\workspace\reservation\src\main\resources\token>certutil -encode jwt-secret-key.txt jwt_secret_key_encoding_b64
+       입력 길이 = 49
+       출력 길이 = 128
+       CertUtil: -encode 명령이 성공적으로 완료되었습니다.
+   - 도움받은 블로그 : https://interconnection.tistory.com/120
+
+
+4. application.yml에 설정 추가
+   : 설정한 변수 호출해 JWT 토큰 생성 시 사용가능.
+   - spring.jwt.secret-key: '생성한 비밀키 등록'
+
+
+5. JWT 토큰생성 (TokenAuthenticationProvider.java)
+   : 버전 업데이트에 따라 설정방식 변경됨.
+     (claims 별도 생성x, 속성 설정 메서드 변경됨.
+      Claims : 변경 불가능한 JSON Map (한번 입력 후 getter만 사용가능.))
+   - 참고 블로그
+     : https://velog.io/@qkre/Spring-Security-%EB%B2%84%EC%A0%84-%EC%97%85-%EB%90%9C-%EC%8A%A4%ED%94%84%EB%A7%81-%EC%8B%9C%ED%81%90%EB%A6%AC%ED%8B%B0%EC%97%90%EC%84%9C-JWT-%EB%B0%9C%ED%96%89%ED%95%98%EA%B8%B0
+
+   - 비밀키를 생성하는데 encoding이 아닌 decoding하는 이유...? (아직모름.)
+     JWT 서명을 검증하기 위해서 비밀 키를 생성하는 과정
+     secret 문자열을 UTF-8 바이트 배열로 변환한 후
+     Keys.hmacShakeyFor()를 사용해서 HMAC-SHA 알고리즘에 맞는 키 객체를 만든다!
+     ex) private SecretKey getDecodedSecretKey() {
+            byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+            return Keys.hmacShaKeyFor(keyBytes);
+         }
+
+         비밀키 왜 디코딩..?
+         기존 문자열 혹은 바이트를 인수로 받는 signWith 메서드가 Deprecated 됨.
+         signWith 메서드는 지정된 키와 저장된 알고리즘을 사용해 토큰에 서명함.
+         따라서 java.security의 Key 객체를 인수로 넣음.
+         Key 객체 생성 시 알고리즘 적용 가능.
+         또는 signWith 메서드의 2번째 인수로 알고리즘 넣어도 됨.
+
+
+
+
+
+=============================== << 스프링 시큐리티를 이용한 로그인 (최소한의) 인증 구현 >> ===============================
+1. 사용자 Entity 생성 (Member.java)
+   : 사용자 인증 시 사용할 Entity
+   - 스프링 시큐리티 기능 사용을 위해 UserDetailsService 인터페이스 구현
+
+
+2. 사용자 인증 service (SignInService.java)
+   : DB에 사용자 존재여부, 비밀번호 일치여부 확인 완료 시 로그인 토큰 반환.
+
+   - loadUserByUsername()
+     : 스프링 시큐리티 기능을 사용하기위한 필수구현 메서드
+
+   - UserDetails 반환타입
+     : memberRepository.findByUsername() 메서드의 반환타입은 Optional<MemberEntity>이다.
+       반환값이 null이 아니면 MemberEntity 타입으로 값을 반환한다.
+       MemberEntity는 UserDetails 인터페이스의 구현체이므로
+       loadUserByUsername() 메서드는 다형성에 의해 MemberEntity 타입으로도 반환가능.
+
+   - 그런데 이름이 꼭 ByUsername 이어야 하는지 의문.
+     이러니까 꼭 이름으로 검색하는 것 같은 느낌이 들었다.
+     아래의 블로그를 확인해보면 username은 회원아이디(회원구분식별데이터)로 간주한다.
+     - 참고 블로그
+       : https://velog.io/@jyyoun1022/SpringSpring-Security%EB%A5%BC-%EC%9D%B4%EC%9A%A9%ED%95%9C-%EB%A1%9C%EA%B7%B8%EC%9D%B8%EC%B2%98%EB%A6%AC-5
+
+
+3. 인증 Filter (JwtAuthenticationFileter.java)
+   : 인증 필터를 통해 토큰의 유효성을 확인한다.
+
+   - OncePerRequestFilter 필터를 상속해 생성.
+     : OncePerRequestFilter 라는 필터를 정의해주게 되면 모든 요청이 올 때 마다 (한 요청당 한 번)
+       필터 실행.
+
+   - doFilterInternal() 메서드 필수구현.
+
+   - 사용자가 signup, signin api를 호출했을 때 바로 해당 컨트롤러로 요청이 들어오는 것은 아니다.
+     컨트롤러로 요청이 들어오기 전에 제일 먼저 필터를 거치게 된다.
+     ( 컨트롤러 요청 -> 필터 -> 서블릿 -> 인터셉터 -> aop layer를 거친 후 컨트롤러 호출.
+       응답을 내보낼 때는 위의 과정을 반대로 거쳐 내보낸다. )
+     OncePerRequestFilter를 상속했기에 요청이 들어올 때 마다 매번 해당 필터를 실행하게 된다.
+     따라서 컨트롤러 실행 전의 request. 컨트롤러 실행 후 응답 시 response를 가공가능.
+     So, 컨트롤러에 요청이 들어올 때 마다 사용자토큰의 포함여부, 유효성 여부 등 확인가능.
+
+   - UsernamePasswordAuthenticationToken 클래스
+     : 사용자이름, 비밀번호를 기반으로 사용자 인증을 처리하는 역할을 수행.
+       주로 사용자 인증 정보를 캡슐화하고 인증 프로세스 중에 사용됨.
+     - 주요 목적
+       : 사용자로부터 입력받은 사용자이름, 비밀번호롤
+         AuthenticationManager에 전달에 인증을 수행.
+     - 주요 필드
+       - principal : 사용자이름
+       - credentials : 비밀번호
+       - authorities : 사용자권한
+     - 참고 블로그
+       : https://loginshin.tistory.com/98
+
+
+- 로그인 시 아래의 오류발생
+  (근데 데이터 반환을 회원가입때 하고 로그인 때는 토큰만 반환하는데 왜 로그인 때 에러가 났지..?)
+  : com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Java 8 date/time type `java.time.LocalDateTime` not supported by default: add Module "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" to enable handling (through reference chain: io.jsonwebtoken.impl.DefaultClaims["roles"]->org.hibernate.collection.spi.PersistentBag[0]->com.shop.reservation.entity.MemberRole["createDate"])
+  - 발생원인
+    : LocalDateTime 데이터타입은 바이트화(직렬화) 할 때 어떤 규칙으로 진행할 것인지
+      Serialization에 대한 정의가 되어있지않아 발생한 에러.
+      LocalDateTime에 대해 어떤 데이터 타입으로 직렬화, 역직렬화 할 것인지 따로 지정이 필요.
+  - 해결방법
+    : 날짜타입의 직렬화 역직렬화를 위해 아래의 어노테이션 추가
+        @JsonSerialize(using = LocalDateTimeSerializer.class) // 직렬화
+        @JsonDeserialize(using = LocalDateTimeDeserializer.class) // 역직렬화
+        @JsonFormat(pattern = "yyyy-MM-dd kk-mm:ss") // 원하는 형태의 LocalDateTime 설정
+  - 참고 블로그
+    : https://justdo1tme.tistory.com/entry/Spring-Jackson-%EC%9D%B4%ED%95%B4-%EB%B0%8F-%EC%82%AC%EC%9A%A9%ED%95%98%EA%B8%B0
+
+
+- 발생에러 (왜 member와 role을 무한호출할까...)
+  : 2025-01-03T18:23:14.052+09:00 ERROR 19788
+      --- [reservation] [nio-8080-exec-4] o.a.c.c.C.[.[.[/].[dispatcherServlet]
+      : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception
+      [Request processing failed: io.jsonwebtoken.io.SerializationException:
+      Cannot serialize JWS Payload to JSON.
+      Cause: Unable to serialize object of type io.jsonwebtoken.impl.DefaultClaims:
+      Document nesting depth (1001) exceeds the maximum allowed
+      (1000, from `StreamWriteConstraints.getMaxNestingDepth()`)
+      (through reference chain: io.jsonwebtoken.impl.DefaultClaims["roles"]
+      ->org.hibernate.collection.spi.PersistentBag[0]
+      ->com.shop.reservation.entity.MemberRole["member"]
+      ->com.shop.reservation.entity.Member["roles"]
+      ->org.hibernate.collection.spi.PersistentBag[0]
+      ->com.shop.reservation.entity.MemberRole["member"]
+      ->com.shop.reservation.entity.Member["roles"]
+      ->org.hibernate.collection.spi.PersistentBag[0]
+      ->com.shop.reservation.entity.MemberRole["member"]
+      ->com.shop.reservation.entity.Member["roles"]
+      ->org.hibernate.collection.spi.PersistentBag[0]
+      ->com.shop.reservation.entity.MemberRole["member"]
+      ->com.shop.reservation.entity.Member["roles"]
+      ->org.hibernate.collection.spi.PersistentBag[0]
+      ->com.shop.reservation.entity.MemberRole["member"]
+      ->com.shop.reservation.entity.Member["roles"]
+      ->org.hibernate.collection.spi.PersistentBag[0]
+      ->com.shop.reservation.entity.MemberRole["member"]
+      ->com.shop.reservation.entity.Member["roles"] ... )] with root cause
+      com.fasterxml.jackson.core.exc.StreamConstraintsException: Document nesting depth (1001) exceeds the maximum allowed (1000, from `StreamWriteConstraints.getMaxNestingDepth()`)
+
+   - 단방향으로 Member.java에서만 셋팅하려고 했으나 이런 경우 Member 데이터 DB update 시 MemberRole도 함께 업데이트 되는 문제를 확인했다.
+     해당 문제 뿐 아니라 다른 추가적 문제들로 인해 권장되지 않는 방법이라 이 방법으로 해당 문제는 해결되어도 다른 방법을 찾을 수 밖에 없었다.
+
+   - 일단 MemberRole.java에서 Member 객체 선언 제거,
+     Member.java MemberRole 선언 시 mappedBy = "member" 제거 및 JoinColumn 설정해 해결
+     - 참고 블로그
+       : https://ws-pace.tistory.com/221
+   - 그래도 아래의 에러만 더 발생되고 해결되지않아 다시 찾아 최종해결
+     - 참고블로그 (꼭 볼것)
+       : https://minpaeng.tistory.com/40
+
+   - 위의 방법보다 더 좋은 방법은 entity를 직접 api 리턴값으로 사용하지 않는것이다.
+     api 호출에 대한 반환값으로는 DTO를 생성해 전달할 것을 권장한다.
+     - 참고 블로그
+       : https://velog.io/@power0080/JPA%EC%8F%98%EC%95%84%EC%98%AC%EB%A6%B0-JPA%EC%9D%98-%EC%88%9C%ED%99%98-%EC%B0%B8%EC%A1%B0-JsonManagedReference%EC%97%90%EC%84%9C-%EB%B3%BC%EA%B9%8C-DTO%EB%A1%9C-%EB%B3%BC%EA%B9%8C
+- 발생에러
+ Hibernate: select m1_0.id,m1_0.create_date,m1_0.create_id,m1_0.name,m1_0.password,m1_0.phone,m1_0.update_date,m1_0.update_id from member m1_0 where m1_0.phone=?
+ Hibernate: insert into member (create_date,create_id,name,password,phone,update_date,update_id) values (?,?,?,?,?,?,?)
+ 2025-01-03T18:39:42.728+09:00 ERROR 6920 --- [reservation] [nio-8080-exec-1] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: org.springframework.dao.InvalidDataAccessApiUsageException: org.hibernate.TransientObjectException: persistent instance references an unsaved transient instance of 'com.shop.reservation.entity.MemberRole' (save the transient instance before flushing)] with root cause
+ org.hibernate.TransientObjectException: persistent instance references an unsaved transient instance of 'com.shop.reservation.entity.MemberRole' (save the transient instance before flushing)
+ - 해결방법
+   @OneToMany에 속성 cascade = CascadeType.ALL 원복해 해결
+  - 참고 블로그
+    : https://bcp0109.tistory.com/344
+
+
+
+
+
+=============================== << ResponseEntity >> ===============================
+1. ResponseEntity
+   : HTTP 응답을 나타내는 Spring Framework 클래스.
+     요청에 대한 응답의 HttpHeader, HttpBody, Status Code를 포함해 클라이언트에게 전달할 수 있는 기능 제공.
+   - 참고 블로그
+     : https://velog.io/@2jjong/Spring-Boot-s6xmqo77
+
+2. ResponseEntity.ok()
+   : HTTP 200 Status Code와 함께 Response 생성.
+   - 참고 블로그
+     : https://burningfalls.github.io/java/what-is-response-entity/
 
 
 
