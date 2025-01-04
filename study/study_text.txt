@@ -287,6 +287,12 @@ https://www.elancer.co.kr/blog/detail/235
       즉, null을 인자로 전달하면 @RestControllerAdvice, @ExceptionHandler를 사용하는 클래스에서 예외처리가 가능해진다.
 
 
+7. JWT와 세션
+   - JWT 토큰을 사용해 사용자 인증을 진행하는 경우 Session stateless 설정하는 이유.
+     - 참고 블로그
+       : https://mini-frontend.tistory.com/6
+       : https://giron.tistory.com/17
+
 
 
 

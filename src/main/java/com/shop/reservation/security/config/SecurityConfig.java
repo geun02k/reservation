@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -33,9 +35,14 @@ public class SecurityConfig {
     @Bean
     protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // 기본 로그인 페이지 비활성화
+                .httpBasic(HttpBasicConfigurer::disable)
                 // CSRF 보호를 비활성화
                 // : HTTP POST로 직접 엔드포인트 호출 시 기본적으로는 CSRF 보호를 비활성화 필요.
                 .csrf(AbstractHttpConfigurer::disable)
+                // JWT 토큰으로 사용자 인증 진행하기에 웹 서버가 사용자의 상태를 계속해서 기억하지 않도록 함.
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 접근경로허가
                 .authorizeHttpRequests((authorizeRequests) ->
                                 authorizeRequests
