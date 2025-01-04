@@ -554,3 +554,33 @@ https://www.elancer.co.kr/blog/detail/235
 
 
 
+=============================== << org.apache.tomcat.util.codec.binary.Base64 패키지 이용 시 경고 표시 >> ===============================
+Aes256Util 클래스 생성 시
+Base64.encodeBase64String(encrypted) 에 경고 표시.
+'org. apache. tomcat. util. codec. binary. Base64' is deprecated.
+(Base64 더 이상 사용되지 않음.)
+
+1. 공식문서 확인
+   : org.apache.tomcat.util.codec.binary.Base64 로 검색해 공식문서 확인.
+     톰캣버전 11부터 해당 라이브러리를 제거해 지원하지 않는다고 확인.
+   - 공식문서
+   : https://tomcat.apache.org/tomcat-10.1-doc/api/org/apache/tomcat/util/codec/binary/Base64.html
+
+2. intellij 내장 톰캣 버전확인
+  : spring-boot-starter 에 포함되어있음.
+  - 참고 블로그
+    : https://goateedev.tistory.com/135
+
+우선 톰캣 버전 11이 아니니까 사용해본다...
+대신 추후 변경 용이하도록 adapter를 중간에 끼워두고 변경에 용이하도록 한다.
+
+
+- AES256Util.test 유효하지않은 키 길이 오류 해결방법
+  : 길이는 16, 24, 32 가능.
+    - 참고 블로그
+      : https://oingdaddy.tistory.com/236#google_vignette
+
+
+
+
+
