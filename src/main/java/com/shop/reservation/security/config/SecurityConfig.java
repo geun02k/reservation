@@ -1,5 +1,6 @@
 package com.shop.reservation.security.config;
 
+import com.shop.reservation.security.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,6 +8,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 // @EnableWebSecurity
@@ -18,7 +20,12 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    /** 인증관련설정: 자원별 접근권한 설정 */
+
+    // JWT 를 이용한 인증을 위한 필터
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    /** 인증관련설정
+     *  : 자원별 접근권한 설정 */
     @Bean
     protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -27,8 +34,15 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 // 접근경로허가
                 .authorizeHttpRequests((authorizeRequests) ->
-                                // 모든 경로에 대해 접근허용
-                                authorizeRequests.anyRequest().permitAll());
+                                authorizeRequests
+                                        // 회원가입, 로그인 경로에 대해 모든인원 접근허용
+                                        .requestMatchers("/signup/**", "/signin/**").permitAll()
+                                        // 그 외 경로에 대해 인증필요
+                                        .anyRequest().authenticated())
+                // 이거 안하니까 인증이 필요한 경로 api 호출이 제대로 안됨.
+                // id, password 인증 전에
+                // jwt 토큰  -> 시큐리티 컨텍스트 인증정보로 변환
+                .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
