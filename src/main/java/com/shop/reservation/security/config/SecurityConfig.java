@@ -1,5 +1,7 @@
 package com.shop.reservation.security.config;
 
+import com.shop.reservation.security.exception.handler.CustomAccessDeniedHandler;
+import com.shop.reservation.security.exception.handler.CustomAuthenticationEntryPoint;
 import com.shop.reservation.security.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +25,8 @@ public class SecurityConfig {
 
     // JWT 를 이용한 인증을 위한 필터
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
+    private final CustomAccessDeniedHandler accessDeniedHandler;
 
     /** 인증관련설정
      *  : 자원별 접근권한 설정 */
@@ -42,7 +46,13 @@ public class SecurityConfig {
                 // 이거 안하니까 인증이 필요한 경로 api 호출이 제대로 안됨.
                 // id, password 인증 전에
                 // jwt 토큰  -> 시큐리티 컨텍스트 인증정보로 변환
-                .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(this.jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                // 스프링 시큐리티 예외처리
+                .exceptionHandling(exception ->
+                        exception
+                                .authenticationEntryPoint(this.authenticationEntryPoint)
+                                .accessDeniedHandler(this.accessDeniedHandler));
+
         return http.build();
     }
 
