@@ -3,6 +3,7 @@ package com.shop.reservation.exception.handler;
 import com.shop.reservation.exception.BaseAbstractException;
 import com.shop.reservation.exception.model.CommonErrorResponse;
 import com.shop.reservation.exception.type.DefaultErrorCode;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,6 +13,7 @@ import java.util.Objects;
 
 import static com.shop.reservation.exception.type.DefaultErrorCode.INTERNAL_SERVER_ERROR;
 
+@Slf4j
 @ControllerAdvice
 public class CommonExceptionHandler {
 
@@ -35,6 +37,8 @@ public class CommonExceptionHandler {
 
     @ExceptionHandler
     protected ResponseEntity<CommonErrorResponse> defaultHandler(Exception e) {
+        log.warn(e.getMessage(), e);
+
         // 서버에러객체생성
         DefaultErrorCode errorCode = INTERNAL_SERVER_ERROR;
 
