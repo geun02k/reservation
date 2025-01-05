@@ -38,10 +38,10 @@ public class Shop extends BaseEntity {
 
     private String roadAddress;
 
-    @Column(nullable = false, precision = 18, scale = 13)
+    @Column(nullable = false, precision = 18, scale = 15)
     private BigDecimal latitude;
 
-    @Column(nullable = false, precision = 18, scale = 13)
+    @Column(nullable = false, precision = 18, scale = 15)
     private BigDecimal longitude;
 
     @Column(length = 1)
