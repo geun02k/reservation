@@ -6,6 +6,7 @@ import com.shop.reservation.security.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -22,6 +23,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 //  스프링 시큐리티 구성 : 스프링 시큐리티 구성을 위한 WegbSecurityConfigurer 빈 생성 / 구성 클래스에서 configure() 메서드를 오버라이딩하여 웹 보안 설정 구성가능.
 //  다양한 보안 기능 추가 ex) 폼 기반 인증, 로그인 페이지 구성, 권한 설정 등 가능.
 @EnableWebSecurity
+// @EnableMethodSecurity
+// : 메소드레벨에서 인증권한 설정을 위해 추가
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
