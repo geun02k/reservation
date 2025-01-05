@@ -10,6 +10,8 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -22,10 +24,13 @@ import java.time.LocalDateTime;
 @Setter
 @MappedSuperclass
 @EntityListeners(value={AuditingEntityListener.class})
+@DynamicInsert
+@DynamicUpdate
 public abstract class BaseEntity {
 
     // @Configuration 어노테이션을 받는 config 클래스에서 빈을 주입받아 현재 로그인한 사용자의 정보 매핑가능.
     @CreatedBy
+    @Column(updatable = false)
     private Long createId; // 신규생성시 pk 자동증가로 인한 createId 입력불가로 우선 updatable=true
 
     @CreatedDate
