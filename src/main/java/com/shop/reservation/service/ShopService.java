@@ -34,11 +34,45 @@ public class ShopService {
         return shopRepository.save(shop);
     }
 
+    /**
+     * 매장수정
+     * @param shop 수정할 매장 객체 정보
+     * @param member 수정자(점장) 객체 정보
+     * @return 수정한 매장 객체 정보
+     */
+    @Transactional
+    public Shop modifyShop(Shop shop, Member member) {
+        // 매장정보 validation check
+        shopUpdateValidationCheck(shop, member);
+        // 매장정보 수정 및 반환
+        return shopRepository.save(shop);
+    }
+
+
     // 매장등록 시 매장정보 validation check
     private void shopInsertValidationCheck(Shop shop) {
         // id 미존재 validation check
         if(!ObjectUtils.isEmpty(shop.getId())) {
             throw new ShopException(ALREADY_REGISTERED_SHOP);
+        }
+
+        shopCommonValidationCheck(shop);
+    }
+
+    // 매장수정 시 매장정보 validation check
+    private void shopUpdateValidationCheck(Shop shop, Member member) {
+        // id validation check
+        if(ObjectUtils.isEmpty(shop.getId())) {
+            throw new ShopException(NOT_REGISTERED_SHOP);
+        }
+
+        Shop foundShop = shopRepository.findById(shop.getId())
+                .orElseThrow(() ->
+                        new ShopException(NOT_REGISTERED_SHOP));
+
+        // 담당자ID validation check
+        if(!Objects.equals(foundShop.getMemberId(), member.getId())) {
+            throw new ShopException(NOT_SHOP_IN_CHARGE);
         }
 
         shopCommonValidationCheck(shop);
@@ -84,6 +118,7 @@ public class ShopService {
 
         // 경도 validation check
         coordinateValidationCheck(shop.getLongitude());
+
     }
 
     // 위도, 경도 같은 좌표 validation check

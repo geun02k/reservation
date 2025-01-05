@@ -12,6 +12,8 @@ public enum ShopErrorCode implements CommonErrorCode {
     NO_REGISTRATION_AUTHORITY(HttpStatus.FORBIDDEN.value(), "매장 등록 권한이 없습니다."),
 
     ALREADY_REGISTERED_SHOP(HttpStatus.BAD_REQUEST.value(), "이미 등록된 매장입니다."),
+    NOT_REGISTERED_SHOP(HttpStatus.BAD_REQUEST.value(), "등록되지 않은 매장입니다."),
+    NOT_SHOP_IN_CHARGE(HttpStatus.BAD_REQUEST.value(), "담당 매장이 아닙니다."),
 
     INVALID_TEL_NUMBER(HttpStatus.BAD_REQUEST.value(), "유효하지 않은 전화번호입니다."),
     LIMIT_NAME_CHARACTERS_FROM_1_TO_100(HttpStatus.BAD_REQUEST.value(), "매장명 길이는 최소 1자, 최대 100자로 제한됩니다."),
