@@ -18,6 +18,7 @@ public class ShopController {
     private final ShopService shopService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('SHOP_MANAGER')")
     public ResponseEntity<Shop> registerShop(
             @RequestBody Shop shop,
             @AuthenticationPrincipal Member member) {
