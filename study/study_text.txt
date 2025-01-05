@@ -538,6 +538,18 @@ https://www.elancer.co.kr/blog/detail/235
 
 
 
+=============================== << 스프링 시큐리티  DB 생성자, 수정자 ID 자동입력 >> ===============================
+ 생성자, 수정자 자동등록을 위해 추가
+ @CreatedBy,  @LastModifiedBy 어노테이션 사용을 위해 추가.
+ 해당 AuditorAware 인터페이스 구현하지 않으면 생성자, 수정자 자동입력불가.
+
+- 참고 블로그
+  : https://eoneunal.tistory.com/33
+
+
+
+
+
 =============================== << ResponseEntity >> ===============================
 1. ResponseEntity
    : HTTP 응답을 나타내는 Spring Framework 클래스.
