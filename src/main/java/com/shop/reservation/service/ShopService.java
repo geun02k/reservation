@@ -75,6 +75,11 @@ public class ShopService {
             throw new ShopException(NOT_SHOP_IN_CHARGE);
         }
 
+        // 매장식제여부 validation check
+        if(foundShop.getDelYn().equals("Y")) {
+            throw new ShopException(REMOVED_SHOP);
+        }
+
         shopCommonValidationCheck(shop);
     }
 
