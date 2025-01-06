@@ -6,6 +6,8 @@ import com.shop.reservation.exception.ShopException;
 import com.shop.reservation.repository.ShopRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -14,6 +16,7 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static com.shop.reservation.exception.type.ShopErrorCode.*;
+import static com.shop.reservation.type.ShopSearchType.*;
 
 @Service
 @RequiredArgsConstructor
@@ -62,6 +65,36 @@ public class ShopService {
         shop.setDelYn("Y");
         // 매장정보 삭제 및 반환
         return shopRepository.save(shop);
+    }
+
+    /**
+     * 매장목록조회
+     * @param orderByStd 정렬기준
+     * @param keyword 검색할 매장명
+     * @return List<Shop> 검색한 매장목록
+     */
+    public Page<Shop> searchShopList(Pageable pageable,
+                                     int orderByStd,
+                                     String keyword) {
+        // validation check
+        if (ObjectUtils.isEmpty(keyword.trim())
+                || keyword.trim().length() > 100) {
+            throw new ShopException(LIMIT_NAME_CHARACTERS_FROM_1_TO_100);
+        }
+
+        // 정렬순서에 따른 매장목록조회
+        Page<Shop> shopPage = null;
+        if (orderByStd == ORDER_BY_DISTANCE.value()) {
+
+
+        } else if (orderByStd == ORDER_BY_RATING.value()) {
+
+
+        } else { // 기본 매장명 순 정렬
+            shopPage = shopRepository.findByNameContainsAndDelYnOrderByName(keyword, "N", pageable);
+        }
+
+        return shopPage;
     }
 
     // 매장등록 시 매장정보 validation check
