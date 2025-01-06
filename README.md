@@ -16,6 +16,18 @@
    회원가입 시, 즉 회원가입 전이라 사용자의 id가 없는 경우에는 데이터를 넣을 수 없나요?
    > - 참고 : SignUpService.saveManager()
 
+3. exception handler 2개 생성 시 오류발생
+   > 초기에 사용자정의 공통에러를 생성하는 CommonExceptionHandler를 작성했습니다.   
+   그리고 스프링 시큐리티 관련 핸들러인 CustomAccessDeniedHandler, CustomAuthenticationEntryPoint 예외처리를 위해
+   SpringSecurityExceptionHandler를 작성했습니다.   
+   추후 발생하는 다른 모든 에러에 대해 예외처리를 수행하기위해 Exception 전체를 인자로 받는
+   CommonExceptionHandler.defaultHandler()를 생성했습니다.   
+   그랬더니 이전에 잘 동작했던 SpringSecurityExceptionHandler에 작성된 예외처리가 정상수행되지 않았습니다.   
+   정의한 default예외 발생시키거나 인증관련 예외를 발생시켜야하는데 인증허가되는 오류가 발생하기 시작했습니다.   
+   정의한 인증예외를 던지지 않고 정의한 default예외(CommonExceptionHandler.defaultHandler())를 발생시키는 오류로 인해 
+   두 exception handler를 통합했습니다.   
+   SecurityExceptionHandler와 CommonExceptionHandler를 통합하니까 해당 오류가 발생하지 않는 것 같아 수정은 했지만 어떤 이유에서 그렇게 되는지 궁금합니다.
+   > - 참고 : CommonExceptionHandler.java
 
 
     
@@ -68,7 +80,7 @@
     - 파트너 회원가입 후 등록가능. (스프링 시큐리티에서 인증 절차 거치므로 service단에서 체크하지않음.)
     - 승인조건없음.
 - [x] 매장 수정 (005-SHOP-MODIFY)
-- [ ] 매장 삭제
+- [x] 매장 삭제 (006-SHOP-REMOVE)
 - [ ] 예약 정보 확인 
     - 날짜별 시간 테이블 목록 확인가능.
 

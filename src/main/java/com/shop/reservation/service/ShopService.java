@@ -48,6 +48,21 @@ public class ShopService {
         return shopRepository.save(shop);
     }
 
+    /**
+     * 매장삭제(논리적삭제)
+     * @param shop 삭제할 매장 객체 정보
+     * @param member 점장 객체 정보
+     * @return 논리적 삭제 건 수
+     */
+    @Transactional
+    public Shop removeShop(Shop shop, Member member) {
+        // 매장정보 validation check
+        shopRemoveValidationCheck(shop, member);
+        // delYn 수정
+        shop.setDelYn("Y");
+        // 매장정보 삭제 및 반환
+        return shopRepository.save(shop);
+    }
 
     // 매장등록 시 매장정보 validation check
     private void shopInsertValidationCheck(Shop shop) {
@@ -75,7 +90,29 @@ public class ShopService {
             throw new ShopException(NOT_SHOP_IN_CHARGE);
         }
 
+        // 매장식제여부 validation check
+        if(foundShop.getDelYn().equals("Y")) {
+            throw new ShopException(REMOVED_SHOP);
+        }
+
         shopCommonValidationCheck(shop);
+    }
+
+    // 매장삭제 validation check
+    private void shopRemoveValidationCheck(Shop shop, Member member) {
+        // id validation check
+        if(ObjectUtils.isEmpty(shop.getId())) {
+            throw new ShopException(NOT_REGISTERED_SHOP);
+        }
+
+        Shop foundShop = shopRepository.findById(shop.getId())
+                .orElseThrow(() ->
+                        new ShopException(NOT_REGISTERED_SHOP));
+
+        // 담당자ID validation check
+        if(!Objects.equals(foundShop.getMemberId(), member.getId())) {
+            throw new ShopException(NOT_SHOP_IN_CHARGE);
+        }
     }
 
     // 매장 insert, update validation check
