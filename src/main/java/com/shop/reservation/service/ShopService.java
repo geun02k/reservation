@@ -88,7 +88,7 @@ public class ShopService {
 
 
         } else if (orderByStd == ORDER_BY_RATING.value()) {
-
+            shopPage = shopRepository.findByNameContainsAndDelYnOrderByRating(keyword, pageable);
 
         } else { // 기본 매장명 순 정렬
             shopPage = shopRepository.findByNameContainsAndDelYnOrderByName(keyword, "N", pageable);
