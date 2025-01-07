@@ -4,8 +4,12 @@ import com.shop.reservation.entity.Member;
 import com.shop.reservation.entity.Shop;
 import com.shop.reservation.exception.ShopException;
 import com.shop.reservation.exception.type.ShopErrorCode;
+import com.shop.reservation.model.ShopSearchRequestDto;
+import com.shop.reservation.model.ShopSearchResponseDto;
 import com.shop.reservation.service.ShopService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -49,6 +53,16 @@ public class ShopController {
             throw new ShopException(ShopErrorCode.FAIL_REMOVE_SHOP);
         }
         return ResponseEntity.ok("삭제되었습니다.");
+    }
+
+    /** 매장목록조회 (고객 권한) */
+    @GetMapping
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public ResponseEntity<?> searchShopList(
+            @RequestBody ShopSearchRequestDto requestDto,
+            final Pageable pageable) {
+        Page<ShopSearchResponseDto> shopPage = shopService.searchShopList(requestDto, pageable);
+        return ResponseEntity.ok(shopPage);
     }
 
 }

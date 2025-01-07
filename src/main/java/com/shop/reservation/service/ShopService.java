@@ -3,9 +3,13 @@ package com.shop.reservation.service;
 import com.shop.reservation.entity.Member;
 import com.shop.reservation.entity.Shop;
 import com.shop.reservation.exception.ShopException;
+import com.shop.reservation.model.ShopSearchRequestDto;
+import com.shop.reservation.model.ShopSearchResponseDto;
 import com.shop.reservation.repository.ShopRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -14,6 +18,7 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static com.shop.reservation.exception.type.ShopErrorCode.*;
+import static com.shop.reservation.type.ShopSearchType.*;
 
 @Service
 @RequiredArgsConstructor
@@ -62,6 +67,46 @@ public class ShopService {
         shop.setDelYn("Y");
         // 매장정보 삭제 및 반환
         return shopRepository.save(shop);
+    }
+
+    /**
+     * 매장목록조회
+     * @param requestDto 매장목록조회 요청 DTO 객체
+     * @return List<Shop> 검색한 매장목록
+     */
+    public Page<ShopSearchResponseDto> searchShopList(ShopSearchRequestDto requestDto,
+                                                      Pageable pageable) {
+        // validation check
+        if (ObjectUtils.isEmpty(requestDto.getKeyword().trim())
+                || requestDto.getKeyword().trim().length() > 100) {
+            throw new ShopException(LIMIT_NAME_CHARACTERS_FROM_1_TO_100);
+        }
+
+        // 정렬순서에 따른 매장목록조회
+        Page<ShopSearchResponseDto> shopPage = null;
+        if (requestDto.getOrderByStd() == ORDER_BY_DISTANCE.value()) {
+            // 위도, 경도 validation check
+            if(ObjectUtils.isEmpty(requestDto.getLatitude())) {
+                throw new ShopException(REQUEST_PARAM_LATITUDE_IS_NULL);
+            }
+            if(ObjectUtils.isEmpty(requestDto.getLongitude())) {
+                throw new ShopException(REQUEST_PARAM_LONGITUDE_IS_NULL);
+            }
+
+            shopPage = shopRepository.findByNameContainsAndDelYnOrderByDistance(
+                    requestDto.getKeyword(), requestDto.getLatitude(),
+                    requestDto.getLongitude(), pageable);
+
+        } else if (requestDto.getOrderByStd() == ORDER_BY_RATING.value()) { // 평점 내림차순 정렬
+            shopPage = shopRepository.findByNameContainsAndDelYnOrderByRating(
+                    requestDto.getKeyword(), pageable);
+
+        } else { // 기본 매장명 오름차순 정렬
+            shopPage = shopRepository.findByNameContainsAndDelYnOrderByName(
+                    requestDto.getKeyword(), "N", pageable);
+        }
+
+        return shopPage;
     }
 
     // 매장등록 시 매장정보 validation check

@@ -22,8 +22,11 @@ public enum ShopErrorCode implements CommonErrorCode {
     LIMIT_GROUP_CATEGORY_CHARACTERS_FROM_1_TO_50(HttpStatus.BAD_REQUEST.value(), "그룹 카테고리명 길이는 최소 1자, 최대 50자로 제한됩니다."),
     LIMIT_ADDRESS_CHARACTERS_FROM_1_TO_200(HttpStatus.BAD_REQUEST.value(), "주소 길이는 최소 1자, 최대 200자로 제한됩니다."),
     LIMIT_ROAD_ADDRESS_CHARACTERS_FROM_1_TO_200(HttpStatus.BAD_REQUEST.value(), "도로명주소 길이는 최소 1자, 최대 200자로 제한됩니다."),
-    LIMIT_PRECISION_LENGTH_18(HttpStatus.BAD_REQUEST.value(), "위도, 경도 좌표는 총 길이 18자 이하, 소수점 아래 13자 이하로 제한됩니다.")
+    LIMIT_PRECISION_LENGTH_18(HttpStatus.BAD_REQUEST.value(), "위도, 경도 좌표는 총 길이 18자 이하, 소수점 아래 13자 이하로 제한됩니다."),
 
+    // shop list search request param validation check
+    REQUEST_PARAM_LATITUDE_IS_NULL(HttpStatus.BAD_REQUEST.value(), "위도를 입력하세요."),
+    REQUEST_PARAM_LONGITUDE_IS_NULL(HttpStatus.BAD_REQUEST.value(), "경도를 입력하세요.")
     ;
 
     private final int statusCode; // http 상태코드

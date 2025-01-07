@@ -29,6 +29,10 @@
    SecurityExceptionHandler와 CommonExceptionHandler를 통합하니까 해당 오류가 발생하지 않는 것 같아 수정은 했지만 어떤 이유에서 그렇게 되는지 궁금합니다.
    > - 참고 : CommonExceptionHandler.java
 
+4. JPA 긴 쿼리 관리하기
+    > 쿼리를 직접 작성할 때  @Query의 value속성에 작성하지 않고 파일로 빼서 쿼리를 관리할 수 있는 방법이 있는지 궁금합니다.    
+      아니면 보통 쿼리가 길어지더라도 @Query에 value 속성에 작성하나요?
+    > - 참고 : ShopRepository.java
 
     
 
@@ -58,7 +62,7 @@
 
 ### 고객(매장이용자)
 - [x] 회원 가입 (002-SIGN-UP-ALL)
-- [ ] 매장 검색
+- [x] 매장 검색 (007-SHOP-LIST-SEARCH)
     - 가나다순, 별점순, 거리순으로 정렬가능.  
 - [ ] 매장상세정보 확인
 - [ ] 매장 예약
