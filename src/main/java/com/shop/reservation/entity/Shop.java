@@ -48,9 +48,4 @@ public class Shop extends BaseEntity {
     @ColumnDefault("'N'")
     private String delYn;
 
-    // @Transient
-    // DB 테이블에 존재하지 않는 컬럼에 대해 사용.
-    // DB 테이블에 간섭하지 않고 엔티티 클래스 내부에서만 동작.
-    @Transient
-    private double rating;
 }

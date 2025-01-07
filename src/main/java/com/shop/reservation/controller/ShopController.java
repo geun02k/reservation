@@ -4,6 +4,8 @@ import com.shop.reservation.entity.Member;
 import com.shop.reservation.entity.Shop;
 import com.shop.reservation.exception.ShopException;
 import com.shop.reservation.exception.type.ShopErrorCode;
+import com.shop.reservation.model.ShopSearchRequestDto;
+import com.shop.reservation.model.ShopSearchResponseDto;
 import com.shop.reservation.service.ShopService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -56,10 +58,10 @@ public class ShopController {
     /** 매장목록조회 (고객 권한) */
     @GetMapping
     @PreAuthorize("hasAuthority('CUSTOMER')")
-    public ResponseEntity<?> searchShopList( final Pageable pageable,
-                                             @RequestParam int orderByStd,
-                                             @RequestParam String keyword) {
-        Page<Shop> shopPage = shopService.searchShopList(pageable, orderByStd, keyword);
+    public ResponseEntity<?> searchShopList(
+            @RequestBody ShopSearchRequestDto requestDto,
+            final Pageable pageable) {
+        Page<ShopSearchResponseDto> shopPage = shopService.searchShopList(requestDto, pageable);
         return ResponseEntity.ok(shopPage);
     }
 

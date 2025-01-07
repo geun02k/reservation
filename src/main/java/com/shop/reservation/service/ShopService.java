@@ -3,6 +3,8 @@ package com.shop.reservation.service;
 import com.shop.reservation.entity.Member;
 import com.shop.reservation.entity.Shop;
 import com.shop.reservation.exception.ShopException;
+import com.shop.reservation.model.ShopSearchRequestDto;
+import com.shop.reservation.model.ShopSearchResponseDto;
 import com.shop.reservation.repository.ShopRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -69,29 +71,29 @@ public class ShopService {
 
     /**
      * 매장목록조회
-     * @param orderByStd 정렬기준
-     * @param keyword 검색할 매장명
+     * @param requestDto 매장목록조회 요청 DTO 객체
      * @return List<Shop> 검색한 매장목록
      */
-    public Page<Shop> searchShopList(Pageable pageable,
-                                     int orderByStd,
-                                     String keyword) {
+    public Page<ShopSearchResponseDto> searchShopList(ShopSearchRequestDto requestDto,
+                                                      Pageable pageable) {
         // validation check
-        if (ObjectUtils.isEmpty(keyword.trim())
-                || keyword.trim().length() > 100) {
+        if (ObjectUtils.isEmpty(requestDto.getKeyword().trim())
+                || requestDto.getKeyword().trim().length() > 100) {
             throw new ShopException(LIMIT_NAME_CHARACTERS_FROM_1_TO_100);
         }
 
         // 정렬순서에 따른 매장목록조회
-        Page<Shop> shopPage = null;
-        if (orderByStd == ORDER_BY_DISTANCE.value()) {
+        Page<ShopSearchResponseDto> shopPage = null;
+        if (requestDto.getOrderByStd() == ORDER_BY_DISTANCE.value()) {
 
 
-        } else if (orderByStd == ORDER_BY_RATING.value()) {
-            shopPage = shopRepository.findByNameContainsAndDelYnOrderByRating(keyword, pageable);
+        } else if (requestDto.getOrderByStd() == ORDER_BY_RATING.value()) { // 평점 내림차순 정렬
+            shopPage = shopRepository.findByNameContainsAndDelYnOrderByRating(
+                    requestDto.getKeyword(), pageable);
 
-        } else { // 기본 매장명 순 정렬
-            shopPage = shopRepository.findByNameContainsAndDelYnOrderByName(keyword, "N", pageable);
+        } else { // 기본 매장명 오름차순 정렬
+            shopPage = shopRepository.findByNameContainsAndDelYnOrderByName(
+                    requestDto.getKeyword(), "N", pageable);
         }
 
         return shopPage;

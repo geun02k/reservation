@@ -666,5 +666,9 @@ Spring Security에서 로그인한 사용자의 정보를 받아오기 위해서
     : https://nhahan.tistory.com/153
 
 
+- JPA 쿼리 직접작성 시 pageable 인자로 전달하기
+  - 참고 블로그
+    : https://rachel1208.tistory.com/9
+
 
 
