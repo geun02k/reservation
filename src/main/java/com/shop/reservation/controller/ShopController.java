@@ -20,13 +20,14 @@ public class ShopController {
 
     private final ShopService shopService;
 
-    /** 매장등록 (매장 관리자 권한) */
+    /**
+     * 매장등록 (매장 관리자 권한)
+     */
     @PostMapping
     @PreAuthorize("hasAuthority('SHOP_MANAGER')")
     public ResponseEntity<Shop> registerShop(
-            @RequestBody Shop shop,
-            @AuthenticationPrincipal Member member) {
-        return ResponseEntity.ok(shopService.registerShop(shop, member));
+            @RequestBody Shop shop) {
+        return ResponseEntity.ok(shopService.registerShop(shop));
     }
 
     /** 매장수정 (매장 관리자 권한) */

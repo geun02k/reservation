@@ -27,7 +27,7 @@ public class ShopService {
      * @return 저장한 매장 객체 정보
      */
     @Transactional
-    public Shop registerShop(Shop shop, Member member) {
+    public Shop registerShop(Shop shop) {
         // 매장정보 validation check
         shopInsertValidationCheck(shop);
         // 매장정보 저장 및 반환
