@@ -85,7 +85,17 @@ public class ShopService {
         // 정렬순서에 따른 매장목록조회
         Page<ShopSearchResponseDto> shopPage = null;
         if (requestDto.getOrderByStd() == ORDER_BY_DISTANCE.value()) {
+            // 위도, 경도 validation check
+            if(ObjectUtils.isEmpty(requestDto.getLatitude())) {
+                throw new ShopException(REQUEST_PARAM_LATITUDE_IS_NULL);
+            }
+            if(ObjectUtils.isEmpty(requestDto.getLongitude())) {
+                throw new ShopException(REQUEST_PARAM_LONGITUDE_IS_NULL);
+            }
 
+            shopPage = shopRepository.findByNameContainsAndDelYnOrderByDistance(
+                    requestDto.getKeyword(), requestDto.getLatitude(),
+                    requestDto.getLongitude(), pageable);
 
         } else if (requestDto.getOrderByStd() == ORDER_BY_RATING.value()) { // 평점 내림차순 정렬
             shopPage = shopRepository.findByNameContainsAndDelYnOrderByRating(
