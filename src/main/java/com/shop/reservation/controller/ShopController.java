@@ -39,14 +39,16 @@ public class ShopController {
         return ResponseEntity.ok(shopService.modifyShop(shop, member));
     }
 
-    /** 매장삭제 (매장 관리자 권한) */
-    @DeleteMapping
+    /**
+     * 매장삭제 (매장 관리자 권한)
+     */
+    @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('SHOP_MANAGER')")
     public ResponseEntity<String> removeShop(
-            @RequestBody Shop shop,
+            @PathVariable Long id,
             @AuthenticationPrincipal Member member) {
-        Shop removedShop = shopService.removeShop(shop, member);
-        if(ObjectUtils.isEmpty(removedShop)) {
+        Shop removedShop = shopService.removeShop(id, member);
+        if (ObjectUtils.isEmpty(removedShop)) {
             throw new ShopException(ShopErrorCode.FAIL_REMOVE_SHOP);
         }
         return ResponseEntity.ok("삭제되었습니다.");
