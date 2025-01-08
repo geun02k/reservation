@@ -30,7 +30,9 @@ public class ShopController {
         return ResponseEntity.ok(shopService.registerShop(shop));
     }
 
-    /** 매장수정 (매장 관리자 권한) */
+    /**
+     * 매장수정 (매장 관리자 권한)
+     */
     @PutMapping
     @PreAuthorize("hasAuthority('SHOP_MANAGER')")
     public ResponseEntity<Shop> modifyShop(
