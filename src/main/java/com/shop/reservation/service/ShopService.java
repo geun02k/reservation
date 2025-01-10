@@ -32,7 +32,7 @@ public class ShopService {
      * @return 저장한 매장 객체 정보
      */
     @Transactional
-    public Shop registerShop(Shop shop, Member member) {
+    public Shop registerShop(Shop shop) {
         // 매장정보 validation check
         shopInsertValidationCheck(shop);
         // 매장정보 저장 및 반환
@@ -55,14 +55,17 @@ public class ShopService {
 
     /**
      * 매장삭제(논리적삭제)
-     * @param shop 삭제할 매장 객체 정보
+     * @param id 삭제할 매장 ID
      * @param member 점장 객체 정보
      * @return 논리적 삭제 건 수
      */
     @Transactional
-    public Shop removeShop(Shop shop, Member member) {
+    public Shop removeShop(Long id, Member member) {
         // 매장정보 validation check
-        shopRemoveValidationCheck(shop, member);
+        shopRemoveValidationCheck(id, member);
+        // 매장정보 조회
+        Shop shop = shopRepository.findById(id)
+                .orElseThrow(() -> new ShopException(NOT_REGISTERED_SHOP));
         // delYn 수정
         shop.setDelYn("Y");
         // 매장정보 삭제 및 반환
@@ -144,13 +147,13 @@ public class ShopService {
     }
 
     // 매장삭제 validation check
-    private void shopRemoveValidationCheck(Shop shop, Member member) {
+    private void shopRemoveValidationCheck(Long id, Member member) {
         // id validation check
-        if(ObjectUtils.isEmpty(shop.getId())) {
+        if(ObjectUtils.isEmpty(id)) {
             throw new ShopException(NOT_REGISTERED_SHOP);
         }
 
-        Shop foundShop = shopRepository.findById(shop.getId())
+        Shop foundShop = shopRepository.findById(id)
                 .orElseThrow(() ->
                         new ShopException(NOT_REGISTERED_SHOP));
 
